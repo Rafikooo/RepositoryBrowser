@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace spec\App\Service;
 
+use App\Exception\ProviderNotExistsException;
 use App\Provider\GitHub;
 use App\Provider\GitLab;
-use App\Provider\ProviderInterface;
 use PhpSpec\ObjectBehavior;
-use spec\App\Provider\GitHubSpec;
 
 class ProviderProxySpec extends ObjectBehavior
 {
@@ -19,5 +18,43 @@ class ProviderProxySpec extends ObjectBehavior
 
         $this->beConstructedWith([$github, $gitlab]);
         $this->getProviders()->shouldReturn([$github, $gitlab]);
+    }
+
+    function it_should_throw_an_exception_if_given_provider_does_not_exists(): void
+    {
+        $github = new GitHub();
+        $gitlab = new GitLab();
+
+        $this->beConstructedWith([$github, $gitlab]);
+        $this->shouldThrow(ProviderNotExistsException::class)
+            ->during('importRepositoryData', [
+                'Rafikooo',
+                'GutHib'
+            ]);
+    }
+
+    function it_should_not_throw_an_exception_if_given_provider_does_exists(): void
+    {
+        $github = new GitHub();
+        $gitlab = new GitLab();
+
+        $this->beConstructedWith([$github, $gitlab]);
+        $this->shouldNotThrow(ProviderNotExistsException::class)
+            ->during('importRepositoryData', [
+                'Rafikooo',
+                'GitHub'
+            ]);
+    }
+
+    function it_return_provider_classes(): void
+    {
+        $github = new GitHub();
+        $gitlab = new GitLab();
+        $this->beConstructedWith([$github, $gitlab]);
+
+        $this->getProviderClasses()->shouldReturn([
+            GitHub::class,
+            GitLab::class,
+        ]);
     }
 }
