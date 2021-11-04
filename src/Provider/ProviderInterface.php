@@ -6,5 +6,5 @@ namespace App\Provider;
 
 interface ProviderInterface
 {
-
+    public function importRepositoryData(string $organization): void;
 }
