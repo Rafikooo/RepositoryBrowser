@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Exception\ProviderNotExistsException;
+use App\Provider\ProviderInterface;
 use App\Service\ProviderProxy;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -44,7 +45,10 @@ class RepositoryImporterCommand extends Command
             $this->providerProxy->importRepositoryData($organization, $provider);
             $io->success('Imported successfully!');
         } catch (ProviderNotExistsException $e) {
-            $io->error('Given provider is not supported');
+            $io->warning('Given provider is not supported');
+            $providers = $this->providerProxy->getProviderClasses(false);
+            $provider = $io->choice("Select one of available", $providers);
+            $this->providerProxy->importRepositoryData($organization, $provider);
         }
 
         return Command::SUCCESS;

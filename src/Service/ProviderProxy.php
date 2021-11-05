@@ -32,12 +32,13 @@ class ProviderProxy
         if(!in_array($givenProvider, $providers)) {
             throw new ProviderNotExistsException();
         }
+        // Future logic
     }
 
-    public function getProviderClasses()
+    public function getProviderClasses(bool $withNamespace = true)
     {
         foreach ($this->providers as $provider) {
-            $result[] = $provider::class;
+            $result[] = $withNamespace ? $provider::class : (new \ReflectionClass($provider))->getShortName();
         }
 
         return $result ?? [];
