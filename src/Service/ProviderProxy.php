@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Exception\ProviderNotExistsException;
 use App\Provider\ProviderInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ProviderProxy
 {
@@ -32,8 +33,13 @@ class ProviderProxy
         if(!in_array($givenProvider, $providers)) {
             throw new ProviderNotExistsException();
         }
-        $provider = new $givenProvider;
-        $provider->importRepositories($organization);
+        foreach($this->providers as $provider) {
+            if($provider::class === $givenProvider) {
+                $repositories = $provider->requestRepositories($organization);
+                dd($repositories);
+            }
+        }
+
     }
 
     public function getProviderClasses(bool $withNamespace = true)
