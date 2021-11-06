@@ -53,5 +53,4 @@ class ProviderProxySpec extends ObjectBehavior
                 'GitHub'
             ]);
     }
-
 }

@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 #[AsCommand(
     name: 'app:repository-importer',
@@ -44,13 +45,18 @@ class RepositoryImporterCommand extends Command
         try {
             $this->providerProxy->importRepositoryData($organization, $provider);
             $io->success('Imported successfully!');
+            $status = Command::SUCCESS;
         } catch (ProviderNotExistsException $e) {
             $io->warning('Given provider is not supported');
             $providers = $this->providerProxy->getProviderClasses(false);
             $provider = $io->choice("Select one of available", $providers);
             $this->providerProxy->importRepositoryData($organization, $provider);
+            $status = Command::FAILURE;
+        } catch (NotFoundHttpException $e) {
+            $io->error('Organization does not exists at given provider');
+            $status = Command::FAILURE;
         }
 
-        return Command::SUCCESS;
+        return $status;
     }
 }
