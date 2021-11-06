@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace App\Provider;
 
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
 class GitLab implements ProviderInterface
 {
-    public function importRepositoryData(string $organization): void
+
+    private HttpClientInterface $client;
+
+    public function __construct(HttpClientInterface $client)
     {
-        // TODO: Implement importRepositoryData() method.
+        $this->client = $client;
+    }
+
+    public function requestRepositories(string $organization): array
+    {
+        return [];
     }
 }
