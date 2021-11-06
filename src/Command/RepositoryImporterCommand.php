@@ -42,6 +42,11 @@ class RepositoryImporterCommand extends Command
         $organization = $input->getArgument('organization');
         $provider = $input->getArgument('provider');
 
+        return $this->callProviderProxy($io, $organization, $provider);
+    }
+
+    private function callProviderProxy(SymfonyStyle $io, string $organization, string $provider): int
+    {
         try {
             $this->providerProxy->importRepositoryData($organization, $provider);
             $io->success('Imported successfully!');
@@ -49,9 +54,8 @@ class RepositoryImporterCommand extends Command
         } catch (ProviderNotExistsException $e) {
             $io->warning('Given provider is not supported');
             $providers = $this->providerProxy->getProviderClasses(false);
-            $provider = $io->choice("Select one of available", $providers);
-            $this->providerProxy->importRepositoryData($organization, $provider);
-            $status = Command::FAILURE;
+            $provider = $io->choice('Select one of available', $providers);
+            $status = $this->callProviderProxy($io, $organization, $provider);
         } catch (NotFoundHttpException $e) {
             $io->error('Organization does not exists at given provider');
             $status = Command::FAILURE;
