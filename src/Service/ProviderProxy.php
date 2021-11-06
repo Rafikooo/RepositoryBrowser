@@ -32,7 +32,8 @@ class ProviderProxy
         if(!in_array($givenProvider, $providers)) {
             throw new ProviderNotExistsException();
         }
-        // Future logic
+        $provider = new $givenProvider;
+        $provider->importRepositories($organization);
     }
 
     public function getProviderClasses(bool $withNamespace = true)
