@@ -6,8 +6,9 @@ namespace App\Provider;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class GitLab implements ProviderInterface
+final class GitLab implements ProviderInterface
 {
+    private string $supportedName = 'GitLab';
 
     private HttpClientInterface $client;
 
@@ -19,5 +20,10 @@ class GitLab implements ProviderInterface
     public function requestRepositories(string $organization): array
     {
         return [];
+    }
+
+    public function supports(string $repository): bool
+    {
+        return $repository === $this->supportedName;
     }
 }

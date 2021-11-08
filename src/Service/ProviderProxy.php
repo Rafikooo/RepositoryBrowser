@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Exception\ProviderNotExistsException;
 use App\Provider\ProviderInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ProviderProxy
@@ -14,10 +15,12 @@ class ProviderProxy
      * @var ProviderInterface[]
      */
     private iterable $providers;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(iterable $providers)
+    public function __construct(iterable $providers, EntityManagerInterface  $entityManager)
     {
         $this->providers = $providers;
+        $this->entityManager = $entityManager;
     }
 
     public function getProviders(): iterable
@@ -27,19 +30,14 @@ class ProviderProxy
 
     public function importRepositoryData(string $organization, string $provider): void
     {
-        $reflector = new \ReflectionClass(ProviderInterface::class);
-        $givenProvider = sprintf('%s\\%s', $reflector->getNamespaceName(), $provider);
-        $providers = $this->getProviderClasses();
-        if(!in_array($givenProvider, $providers)) {
-            throw new ProviderNotExistsException();
-        }
-        foreach($this->providers as $provider) {
-            if($provider::class === $givenProvider) {
-                $repositories = $provider->requestRepositories($organization);
-                dd($repositories);
+        /** @var ProviderInterface $providerObject */
+        foreach ($this->providers as $providerObject) {
+            if ($providerObject->supports($provider)) {
+                dd($providerObject->requestRepositories($organization));
             }
         }
 
+        throw new ProviderNotExistsException();
     }
 
     public function getProviderClasses(bool $withNamespace = true)
