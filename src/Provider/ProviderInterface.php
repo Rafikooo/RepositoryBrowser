@@ -16,4 +16,6 @@ interface ProviderInterface
     public function requestRepositories(string $organization): array;
 
     public function supports(string $repository): bool;
+
+    public function calcTrustPoints(int $commitsCount, int $pullRequestsCount, $stargazersCount): int;
 }

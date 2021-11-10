@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Provider;
 
+use App\Entity\Repo;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -19,6 +20,7 @@ final class GitHub implements ProviderInterface
         $this->client = $client;
     }
 
+    /** @return ProviderInterface[] */
     public function requestRepositories(string $organization): array
     {
         $response = $this->client->request(
@@ -30,11 +32,26 @@ final class GitHub implements ProviderInterface
             throw new NotFoundHttpException();
         }
 
-        return $response->toArray();
+        foreach ($response->toArray() as $item) {
+            $repo = new Repo();
+            $repo->setName($item['name'])
+                ->setFullName($item['full_name'])
+                ->setTrustPoints($this->calcTrustPoints(1, 1, $item['stargazers_count']));
+            $repos[] = $repo;
+        }
+
+        return $repos ?? [];
     }
 
     public function supports(string $repository): bool
     {
         return $repository === $this->supportedName;
+    }
+
+
+    public function calcTrustPoints(int $commitsCount, int $pullRequestsCount, $stargazersCount): int
+    {
+        // TODO
+        return $stargazersCount;
     }
 }

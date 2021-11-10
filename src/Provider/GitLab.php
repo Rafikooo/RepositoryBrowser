@@ -26,4 +26,9 @@ final class GitLab implements ProviderInterface
     {
         return $repository === $this->supportedName;
     }
+
+    public function calcTrustPoints(int $commitsCount, int $pullRequestsCount, $stargazersCount): int
+    {
+        return 0;
+    }
 }

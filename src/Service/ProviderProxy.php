@@ -30,14 +30,12 @@ class ProviderProxy
 
     public function importRepositoryData(string $organization, string $provider): void
     {
-        /** @var ProviderInterface $providerObject */
-        foreach ($this->providers as $providerObject) {
-            if ($providerObject->supports($provider)) {
-                dd($providerObject->requestRepositories($organization));
-            }
+        $providerObject = $this->getSupportedProviderObject($provider);
+        $repos = $providerObject->requestRepositories($organization);
+        foreach ($repos as $repo) {
+            $this->entityManager->persist($repo);
         }
-
-        throw new ProviderNotExistsException();
+        $this->entityManager->flush();
     }
 
     public function getProviderClasses(bool $withNamespace = true)
@@ -47,5 +45,16 @@ class ProviderProxy
         }
 
         return $result ?? [];
+    }
+
+    private function getSupportedProviderObject(string $provider): ProviderInterface
+    {
+        foreach ($this->providers as $providerObject) {
+            if($providerObject->supports($provider)) {
+                return $providerObject;
+            }
+        }
+
+        throw new ProviderNotExistsException();
     }
 }
